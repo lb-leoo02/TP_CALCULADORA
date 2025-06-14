@@ -1,15 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "libs/calculadora.h"
-
+//aklsjdlaksdjaslkd
 int main()
 {
     ecuacion ecuaciones[10]; // ecuaciones={{izq,der}{izq,der}{izq,der}{}{}}
     size_t cecu=0;
     char op;
-    //calculadora(ecuaciones);
-
-
+    
+    int c=0;
     while((op=menu())!='X'){
         switch(op){
             case 'A':
