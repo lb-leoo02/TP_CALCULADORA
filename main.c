@@ -1,32 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "libs/calculadora.h"
-
+#include "libs/Archivos.h"
 int main()
 {
-    ecuacion ecuaciones[10]; // ecuaciones={{izq,der}{izq,der}{izq,der}{}{}}
+    ecuacion ecuaciones[10]; 
     size_t cecu=0;
     char op;
-    //calculadora(ecuaciones);
-
+    int band=0;
+    contarArchivos(&band);
 
     while((op=menu())!='X'){
         switch(op){
             case 'A':
-                if(ingresarecu(ecuaciones, &cecu))
+                if(ingresarecu(ecuaciones, &cecu,1,0))
                     puts("No se pudo aniadir ecuacion");
                 break;
             case 'B':
-                puts("opcion B");
+                mostrarecuaciones(ecuaciones, cecu);
                 break;
             case 'C':
-                puts("opcion C");
+                if(band<3){
+                    if(!GuardaArchivos(ecuaciones, cecu, &band)){
+                        borrarecuacion(ecuaciones,&cecu);
+                    }
+                }
+                else
+                    puts("No podes guardar mas ecuaciones. Utilice la opcion [E] para borrar las ecuaciones guardadas");
                 break;
             case 'D':
-                puts("opcion D");
+                CargarArchivo(ecuaciones,&cecu);
                 break;
             case 'E':
-                puts("opcion E");
+                borrarArchivos();
                 break;
             case 'F':
                 puts("opcion F");
@@ -39,40 +45,7 @@ int main()
                 break;
         }
     }
-    /*
-    for(int i=0; i<cecu; i++){
-        printf("ecuacion %d: %s\n",i+1, ecuaciones[i].ecu);
-    }*/
-    destruirecuaciones(ecuaciones, cecu);
+
+    borrarecuacion(ecuaciones,&cecu);
     return 0;
 }
-
-
-/*
-calculadora(ecuacion ecuaciones){
-    while()
-    puts("[A]fjeifjs");
-    puts("[B]fjeifjs");
-    puts("[C]fjeifjs");
-    puts("[D]fjeifjs");
-    puts("[E]fjeifjs");
-    puts("[F]fjeifjs");
-    puts("[G]fjeifjs");
-    puts("[H]fjeifjs");
-    puts("[X]fjeifjs");
-    printf("ingrese opcion");
-    scanf();
-
-    switch
-        CASE A:
-            meterecuacion(ecuacion);
-        case B:
-            verecuacion();
-        case C:
-            guardarrevisar();
-        case X:
-            return;
-    }       */
-
-
-

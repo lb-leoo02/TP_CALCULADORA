@@ -11,7 +11,7 @@
 #define Amayus(x) (((x) >= 'a' && (x) <= 'z') ? ((x) - ('a' - 'A')) : (x))
 
 #define TAM_ECUACION 512
-#define MAX_ECUAC 3
+#define MAX_ECUAC 10
 
 typedef enum{
     ECUACION_OK,
@@ -36,6 +36,11 @@ void limpiarPantalla() {
 }
 
 
+void borrarecuacion(ecuacion *ecu , size_t *ce){
+    destruirecuaciones(ecu,*ce);
+    *ce=0;
+}
+
 void destruirecuaciones(ecuacion *ecu, size_t n) {
     if (ecu == NULL) return;
 
@@ -48,65 +53,6 @@ void destruirecuaciones(ecuacion *ecu, size_t n) {
         p_ecu++;
     }
 }
-
-
-
-/*
-char menu(){
-    char linea[100];  // buffer suficientemente grande
-    char letra;
-
-    do {
-        printf("\n--- MENU PRINCIPAL ---\n");
-        printf("[A] - Escribir ecuacion\n");
-        printf("[B] - Ver ecuaciones\n");
-        printf("[C] - Guardar y reiniciar\n");
-        printf("[D] - Leer ecuaciones\n");
-        printf("[E] - Borrar ecuaciones guardadas\n");
-        printf("[F] - Resolver ecuacion\n");
-        printf("[G] - Graficar ecuacion\n");
-        printf("[H] - Ayuda\n");
-        printf("[X] - Salir\n");
-        printf("Seleccione una opcion: ");
-
-        fgets(linea, sizeof(linea), stdin); // lee toda la línea
-        letra = toupper(linea[0]);          // toma el primer carácter
-
-        if(letra != 'X' && (letra < 'A' || letra > 'H')){
-            printf("Ingrese letra valida.\n");
-        }
-
-    } while(letra != 'X' && (letra < 'A' || letra > 'H'));
-
-    return letra;
-}*/
-/*
-char menu(){
-    char letra[2];
-    char *p_letra=letra;
-        limpiarPantalla();
-        printf("\n--- MENU PRINCIPAL ---\n");
-        printf("[A] - Escribir ecuacion\n");
-        printf("[B] - Ver ecuaciones\n");
-        printf("[C] - Guardar y reiniciar\n");
-        printf("[D] - Leer ecuaciones\n");
-        printf("[E] - Borrar ecuaciones guardadas\n");
-        printf("[F] - Resolver ecuacion\n");
-        printf("[G] - Graficar ecuacion\n");
-        printf("[H] - Ayuda\n");
-        printf("[X] - Salir\n");
-        printf("Seleccione una opcion: ");
-    do{
-        fgets(letra, 2, stdin);
-        *p_letra=Amayus(*p_letra);
-        getchar();
-        if(*p_letra != 'X' && (*p_letra<'A' || *p_letra>'H')){
-            printf("Ingrese letra valida:\n");
-        }
-    }while(*p_letra != 'X' && (*p_letra<'A' || *p_letra>'H'));
-
-return *p_letra;
-}*/
 
 void limpiarBuffer() {
     int c;
@@ -219,9 +165,6 @@ int verificarecuacion(char* ecu){
 
 return ECUACION_OK;
 }
-
-
-/*
 void introducirecuacion(char* ecu) {
     EstadoEcuacion estado;
 
@@ -239,7 +182,7 @@ void introducirecuacion(char* ecu) {
         }
 
     } while (estado != ECUACION_OK);
-}*/
+}/*
 void introducirecuacion(char* ecu) {
     char buffer[TAM_ECU];
     memset(buffer, 0, sizeof(buffer));
@@ -270,16 +213,18 @@ void introducirecuacion(char* ecu) {
         // Si fgets falla, dejar la ecuación vacía
         *ecu = '\0';
     }
-}
+}*/
 
 
-void mostrarecuaciones(ecuacion *ecuac){
+void mostrarecuaciones(ecuacion *ecuac, size_t ce){
     ecuacion *p_ecuac=ecuac;
-    for(int i=0; i<MAX_ECUAC; i++){
+    for(int i=0; i<ce; i++){
         printf("\necuacion %d: %s\n",i+1, p_ecuac->ecu);
         p_ecuac++;
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////// PRINTEO
 
 void mostrar_char(char* p) {
     printf("%c ", *p);
@@ -305,13 +250,31 @@ void inorder(nodo* root, void (*mostrar1)(char*), void (*mostrar2)(double*)) {
         mostrar2(&root->numero);
     }
 }
+///////////////////////////////////////////////////////////////////////////////// PRINTEO
 
+void introducirecuacionarchivo(char* ecuU, void* ecuarch){
+    char *p_ecuarch=(char*)ecuarch, *p_ecuU=ecuU;
+    while(*p_ecuarch){
+        if(*p_ecuarch!='\n')
+            *p_ecuU=*p_ecuarch;
+        p_ecuU++;
+        p_ecuarch++;
+    }
+    p_ecuU++;
+    p_ecuU='\0';
+}
 
-int ingresarecu(ecuacion *ecuac, size_t *cecu){
+int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
     int num=0;
     ecuacion aux_ecuacion={0}, *p_ecuac;
     char ecuU[TAM_ECUACION]={0};
-    introducirecuacion(ecuU);
+ 
+    if(ingreso){
+        introducirecuacion(ecuU);
+        
+    }
+    else
+        introducirecuacionarchivo(ecuU,ecuarch);
 
     aux_ecuacion.arbol_ecu=NULL;
     p_ecuac=ecuac;
@@ -321,7 +284,7 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu){
         (*cecu)++;
     }else{
         printf("Memoria llena ¿Que ecuacion desea reemplazar?: "); 
-        mostrarecuaciones(ecuac);                                 
+        mostrarecuaciones(ecuac,*cecu);                                 
         do{
             if(num<1 || num>10)
                 printf("\nIngrese un numero valido:");
@@ -353,7 +316,9 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu){
 
     postfija(&ecuac_token); //PASAMOS EL TOKEN A POSTFIJA
     CrearArbol(&ecuac_token,&(p_ecuac->arbol_ecu)); //CREAMOS EL ARBOL CON LOS DATOS DE LA ECUACION
-    inorder(p_ecuac->arbol_ecu, mostrar_char, mostrar_double);
+
+
+    inorder(p_ecuac->arbol_ecu, mostrar_char, mostrar_double); //printea el arbol inorder
 
 
 
@@ -361,7 +326,25 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu){
 
 return 0;
 }
+/*
+void recorrerPostorden(nodo* raiz) {
+    if (raiz == NULL) return;
 
+    if (raiz->tipo == OPERADOR) {
+        recorrerPostorden(raiz->op.izq);
+        recorrerPostorden(raiz->op.der);
+        printf("%c ", raiz->op.operador);
+    } else if (raiz->tipo == NUMERO) {
+        printf("%.2f ", raiz->numero);
+    } else if (raiz->tipo == VARIABLE) {
+        printf("%c ", raiz->variable);
+    }
+}
+
+void evaluarecuacion(nodo*arbol, double valor){ // x^(2)-y^(2)=0
+
+}
+*/
 void ayuda(){
     puts("INTRODUCIR ECUACIONES SIGUIENDO LAS SIGUIENTES REGLAS PARA EL CORRECTO FUNCIONAMIENTO DEL PROGRAMA:");
     puts("VARIABLES: Solo se acepta X e Y.");
@@ -377,5 +360,3 @@ void ayuda(){
     getchar();
     limpiarBuffer();
 }
-
-
