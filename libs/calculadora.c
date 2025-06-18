@@ -5,6 +5,7 @@
 #include "Vector.h"
 #include "calculadora.h"
 #include <string.h>
+#include "Archivos.h"
 
 #define EsOperacion(x) (((x)=='+') || ((x)=='-') || ((x)=='/') || ((x)=='*') ||  ((x)=='^'))
 #define EsVariable(x) (((x)=='x') || ((x)=='y') || ((x)=='X') || ((x)=='Y'))
@@ -102,16 +103,16 @@ void quitarespacios(char* ecu) {
 }
 
 int verificarecuacion(char* ecu){
-    char *p_ecu=ecu; // -2^(1/2) || 1/(x-2) cuando x=2 
+    char *p_ecu=ecu; // -2^(1/2) || 1/(x-2) cuando x=2
     int band_error=ECUACION_OK, cont_par_abi=0, cont_par_cerr=0, cont_variables=0, cont_igual=0;
-    quitarespacios(ecu); 
+    quitarespacios(ecu);
     while(*p_ecu && !band_error && (esoperador(*p_ecu) || esnumero(*p_ecu) || esvariable(*p_ecu) || esparentesis(*p_ecu))){
 
-        
+
         if(p_ecu > ecu && *(p_ecu-1)=='=' && !(*p_ecu=='+' ||*p_ecu=='-'  || *p_ecu=='(' || esnumero(*p_ecu) || esvariable(*p_ecu))){
             band_error=ERROR_IGUAL_OPERADOR;
         }
-        if(*ecu=='='){ 
+        if(*ecu=='='){
             band_error=ERROR_IGUAL;
         }
         if(*p_ecu=='='){
@@ -171,8 +172,7 @@ void introducirecuacion(char* ecu) {
     do {
         printf("Introduzca una ecuacion: ");
         fgets(ecu, TAM_ECU, stdin);
-
-        ecu[strcspn(ecu, "\n")] = '\0';  // Eliminar salto de línea si quedo
+        quitarenter(ecu);
 
         estado = verificarecuacion(ecu);
 
@@ -182,39 +182,7 @@ void introducirecuacion(char* ecu) {
         }
 
     } while (estado != ECUACION_OK);
-}/*
-void introducirecuacion(char* ecu) {
-    char buffer[TAM_ECU];
-    memset(buffer, 0, sizeof(buffer));
-    memset(ecu, 0, TAM_ECUACION);
-    char* p;
-
-    printf("Introduzca una ecuacion: ");
-
-    if (fgets(buffer, sizeof(buffer), stdin)) {
-        // Recorremos el buffer para quitar '\n' y espacios, usando punteros
-        p = buffer;
-        while (*p && *p != '\n') p++;
-        if (*p == '\n') *p = '\0';
-
-        // Limpiar espacios con quitarespacios (ya usa punteros)
-        quitarespacios(buffer);
-
-        // Copiar a ecu solo si entra en el tamaño permitido
-        p = buffer;
-        char* dest = ecu;
-        size_t count = 0;
-        while (*p && count < TAM_ECUACION - 1) {
-            *dest++ = *p++;
-            count++;
-        }
-        *dest = '\0';
-    } else {
-        // Si fgets falla, dejar la ecuación vacía
-        *ecu = '\0';
-    }
-}*/
-
+}
 
 void mostrarecuaciones(ecuacion *ecuac, size_t ce){
     ecuacion *p_ecuac=ecuac;
@@ -268,10 +236,10 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
     int num=0;
     ecuacion aux_ecuacion={0}, *p_ecuac;
     char ecuU[TAM_ECUACION]={0};
- 
+
     if(ingreso){
         introducirecuacion(ecuU);
-        
+
     }
     else
         introducirecuacionarchivo(ecuU,ecuarch);
@@ -283,8 +251,8 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
         p_ecuac+=*cecu;
         (*cecu)++;
     }else{
-        printf("Memoria llena ¿Que ecuacion desea reemplazar?: "); 
-        mostrarecuaciones(ecuac,*cecu);                                 
+        printf("Memoria llena ¿Que ecuacion desea reemplazar?: ");
+        mostrarecuaciones(ecuac,*cecu);
         do{
             if(num<1 || num>10)
                 printf("\nIngrese un numero valido:");
@@ -306,7 +274,7 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
     puts("");
     printtoken(&ecuac_token);
     puts("");
-    
+
     insertarmultiplicaciones(&ecuac_token); //Ingresamos las multiplicaciones implicitas
 
 
@@ -326,25 +294,7 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
 
 return 0;
 }
-/*
-void recorrerPostorden(nodo* raiz) {
-    if (raiz == NULL) return;
 
-    if (raiz->tipo == OPERADOR) {
-        recorrerPostorden(raiz->op.izq);
-        recorrerPostorden(raiz->op.der);
-        printf("%c ", raiz->op.operador);
-    } else if (raiz->tipo == NUMERO) {
-        printf("%.2f ", raiz->numero);
-    } else if (raiz->tipo == VARIABLE) {
-        printf("%c ", raiz->variable);
-    }
-}
-
-void evaluarecuacion(nodo*arbol, double valor){ // x^(2)-y^(2)=0
-
-}
-*/
 void ayuda(){
     puts("INTRODUCIR ECUACIONES SIGUIENDO LAS SIGUIENTES REGLAS PARA EL CORRECTO FUNCIONAMIENTO DEL PROGRAMA:");
     puts("VARIABLES: Solo se acepta X e Y.");
