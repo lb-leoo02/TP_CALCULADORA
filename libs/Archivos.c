@@ -82,7 +82,7 @@ return 0;
 int CargarArchivo(ecuacion* ecu,size_t *cecu){
     FILE *pf;
     int i=0, band_arch=1;
-    char lineaarch[TAM_ECU], lineausuario[TAM_ECU], *p;
+    char lineaarch[TAM_ECU], lineausuario[TAM_ECU];
     pf=fopen("NombresArchivos.txt","rt");
      if(!pf){
         printf("No se pudo abrir el archivo.\n");
