@@ -150,7 +150,7 @@ int verificarecuacion(char* ecu){
         band_error=SYNTAX_ERROR;
         return band_error;
     }
-    if(p_ecu > ecu && *(p_ecu-1)=='=' || cont_igual!=1){
+    if(p_ecu > ecu && (*(p_ecu-1)=='=' || cont_igual!=1)){
         band_error=ERROR_IGUAL;
     }
     if(!cont_variables)
