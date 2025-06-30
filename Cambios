@@ -1,0 +1,18 @@
+main.c:
+-opcion E: Se agrego un reincio de conteo de archivos ya que no permitia seguir guardando mas ecuaciones una vez que eran borradas.
+-opcion A: Se agrego nuevas opciones para cambiar ecuaciones y para confirmar nueva ecuacion.
+-opcion F: Se desarrollo con sus consignas.
+-opcion X: Se añadio para poder tener una confirmacion de salida.
+
+calculadora.c : 
+-introducirecuacion: Se agrego una verificacion a la hora de ingresar ecuaciones.
+-ingresarecu: Se soluciono un error de memory leak al momento de reemplazar ecuaciones.
+-ingresarecu: Se agrego una opcion para reemplazar ecuaciones (INGRESO==2).
+-evaluarArbol: se añadio funcion para evaluar ecuaciones.
+-pedir_opcion: se añadio nueva funcion para las subopciones del main.
+-EvaluarXeY: Se añadio funcion para la opcion F que evalua los valores que le de el usuario.
+
+
+Archivos.c :
+-GuardaArchivos: Se agrego un do-while para verificar que haya un nombre valido y no se guarden archivos sin nombre.
+
