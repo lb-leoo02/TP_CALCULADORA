@@ -111,10 +111,11 @@ Recorrer la postfija y construir el árbol usando una pila X
 int crearnodo(nodo**, int,Token*);
 //Se linkean nodos para crear arbol el primer dato es la raiz el siguiente es la hoja der y el tercer dato es la hoja izq
 void linkearnodos(nodo*,nodo*,nodo*);
-//libera el espacio de memoria creado  por el arbol entero
-void EliminarArbol(nodo*);
 //toma la ecuacion ya TOKENIZADA y la convierte en arbol recorriendolo en postfija
 int CrearArbol(Vector*,nodo**);
+//libera el espacio de memoria creado  por el arbol entero
+void EliminarArbol(nodo*);
+
 
 
 #endif // ARBOL_MATH_H_INCLUDED
