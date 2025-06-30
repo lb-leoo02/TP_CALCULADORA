@@ -27,14 +27,24 @@ int contarArchivos(int *band){
 }
 
 int GuardaArchivos(ecuacion* ecu, size_t ce, int* band){
-    char nomArch[NOM_ARCH], nom[NOM_ARCH];
-    int i=0, nombandera=1;
+    char nomArch[NOM_ARCH], nom[NOM_ARCH], *p_nomarch;
+    int i=0, nombandera=1, bandnomarch=1;
     FILE* pf1, *pf;
 
+    if(ce==0){
+        printf("No hay ecuaciones para guardadas\n");
+        return 0;
+    }
+
     printf("\nElija el nombre con el que se va a guardar el archivo: ");
+    do{
+        fgets(nomArch,NOM_ARCH, stdin);
+        quitarenter(nomArch);
+        p_nomarch=nomArch;
+        if(*p_nomarch=='\0')
+            printf("Ingrese un nombre valido para el archivo: ");
+    }while(*p_nomarch=='\0');
     
-    fgets(nomArch,NOM_ARCH, stdin);
-    quitarenter(nomArch);
     strcpy(nomArch,strcat(nomArch,".txt"));
     
     pf = fopen(nomArch, "wt");
@@ -53,7 +63,7 @@ int GuardaArchivos(ecuacion* ecu, size_t ce, int* band){
     
     pf1= fopen("NombresArchivos.txt", "a+t");
     if(!pf1){
-        printf("No se pudo crear el archivo de nombres.\n");
+        printf("No se pudo crear/abrir el archivo de nombres.\n");
         return 1;
     }
     rewind(pf1);
@@ -85,7 +95,7 @@ int CargarArchivo(ecuacion* ecu,size_t *cecu){
     char lineaarch[TAM_ECU], lineausuario[TAM_ECU];
     pf=fopen("NombresArchivos.txt","rt");
      if(!pf){
-        printf("No se pudo abrir el archivo.\n");
+        printf("No se encontraron archivos guardados.\n");
         return 1;
     }
 
@@ -134,7 +144,7 @@ int borrarArchivos(){
     char linea[TAM_ECU];
     pf_arch=fopen("NombresArchivos.txt","rt");
     if(!pf_arch){
-        printf("No se pudo abrir el archivo.\n");
+        printf("No se encontraron archivos creados\n");
         return 1;
     }
     while(fgets(linea,TAM_ECU,pf_arch)){
