@@ -7,12 +7,10 @@
 #include <string.h>
 #include "Archivos.h"
 
-#define EsOperacion(x) (((x)=='+') || ((x)=='-') || ((x)=='/') || ((x)=='*') ||  ((x)=='^'))
-#define EsVariable(x) (((x)=='x') || ((x)=='y') || ((x)=='X') || ((x)=='Y'))
-#define Amayus(x) (((x) >= 'a' && (x) <= 'z') ? ((x) - ('a' - 'A')) : (x))
+
 
 #define TAM_ECUACION 512
-#define MAX_ECUAC 10
+#define MAX_ECUAC 2
 
 typedef enum{
     ECUACION_OK,
@@ -58,6 +56,25 @@ void destruirecuaciones(ecuacion *ecu, size_t n) {
 void limpiarBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
+}
+
+char pedir_opcion(const char *validas, const char *mensaje) {
+    char op;
+    printf("%s", mensaje);
+    do {
+        do {
+            op = getchar();
+        } while (op == '\n' || op == ' ');  // ignora enter o espacios
+
+        limpiarBuffer();  // limpia el resto de la línea
+        op = Amayus(op);
+
+        if (!strchr(validas, op)) {
+            printf("Ingrese una opción válida: ");
+        }
+    } while (!strchr(validas, op));
+
+    return op;
 }
 
 char menu(){
@@ -168,17 +185,29 @@ return ECUACION_OK;
 }
 void introducirecuacion(char* ecu) {
     EstadoEcuacion estado;
-
+    char confirmacion;
     do {
+        estado=1;
         printf("Introduzca una ecuacion: ");
         fgets(ecu, TAM_ECU, stdin);
         quitarenter(ecu);
+        printf("\nEcuacion: %s",ecu);
+        printf("\nDesea introducir esta ecuacion? S/N: ");
+        do{
+            scanf("%c",&confirmacion);
+            limpiarBuffer();
+            confirmacion=Amayus(confirmacion);
+            if(confirmacion!='S' && confirmacion!='N')
+                printf("\nEliga una opcion correcta: ");
+        }while(confirmacion!='S' && confirmacion!='N');
+        
+        if(confirmacion=='S'){
+            estado = verificarecuacion(ecu);
 
-        estado = verificarecuacion(ecu);
-
-        if (estado != ECUACION_OK) {
-            ayuda(); // Muestra ayuda si hay error
-            printf("Ecuacion invalida. Vuelva a intentar.\n");
+            if (estado != ECUACION_OK) {
+                ayuda(); // Muestra ayuda si hay error
+                printf("Ecuacion invalida. Vuelva a intentar.\n");
+            }
         }
 
     } while (estado != ECUACION_OK);
@@ -187,12 +216,13 @@ void introducirecuacion(char* ecu) {
 void mostrarecuaciones(ecuacion *ecuac, size_t ce){
     ecuacion *p_ecuac=ecuac;
     for(int i=0; i<ce; i++){
-        printf("\necuacion %d: %s\n",i+1, p_ecuac->ecu);
+        printf("\necuacion %d: %s",i+1, p_ecuac->ecu);
         p_ecuac++;
     }
+    
 }
 
-///////////////////////////////////////////////////////////////////////////////// PRINTEO
+/////////////////////////////////////////////////////////////////////////////////INI: PRINTEO
 
 void mostrar_char(char* p) {
     printf("%c ", *p);
@@ -218,7 +248,7 @@ void inorder(nodo* root, void (*mostrar1)(char*), void (*mostrar2)(double*)) {
         mostrar2(&root->numero);
     }
 }
-///////////////////////////////////////////////////////////////////////////////// PRINTEO
+/////////////////////////////////////////////////////////////////////////////////FIN: PRINTEO
 
 void introducirecuacionarchivo(char* ecuU, void* ecuarch){
     char *p_ecuarch=(char*)ecuarch, *p_ecuU=ecuU;
@@ -233,43 +263,59 @@ void introducirecuacionarchivo(char* ecuU, void* ecuarch){
 }
 
 int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
-    int num=0;
+    //INGRESO ==1 :CARGAR POR USUARIO
+    //INGRESO ==0: CARGAR POR ARCHIVO
+    //INGRESO ==2
+    int num=-1;
     ecuacion aux_ecuacion={0}, *p_ecuac;
-    char ecuU[TAM_ECUACION]={0};
+    char ecuA[TAM_ECUACION]={0};
 
-    if(ingreso){
-        introducirecuacion(ecuU);
-
+    if(ingreso==1 || ingreso==2){
+        if(ingreso==2)
+            printf("\nReemplazar Ecuacion\n");
+        introducirecuacion(ecuA);
     }
-    else
-        introducirecuacionarchivo(ecuU,ecuarch);
+    else if(ingreso==0){
+        introducirecuacionarchivo(ecuA,ecuarch);
+    }
 
     aux_ecuacion.arbol_ecu=NULL;
     p_ecuac=ecuac;
 
-    if(*cecu<MAX_ECUAC){
+    if(ingreso==1 && *cecu<MAX_ECUAC){
         p_ecuac+=*cecu;
         (*cecu)++;
-    }else{
-        printf("Memoria llena ¿Que ecuacion desea reemplazar?: ");
+    }
+    else{
+        if(ingreso!=2)
+            printf("Memoria llena. Que ecuacion desea reemplazar?: ");
+        else
+            printf("Que ecuacion desea reemplazar?: ");
+        
+        printf("\necuacion 0: %s","CANCELAR");
         mostrarecuaciones(ecuac,*cecu);
         do{
-            if(num<1 || num>10)
+            if(num<0 || num>10)
                 printf("\nIngrese un numero valido:");
             scanf("%d", &num);
-        }while(num<1 || num>10);
+        }while(num<0 || num>10);
 
         aux_ecuacion.arbol_ecu=NULL;
         p_ecuac=ecuac;
         p_ecuac+=(num-1);
     }
 
-    strcpy(aux_ecuacion.ecu, ecuU);
+    if(num==0)
+        return 0;
+
+    strcpy(aux_ecuacion.ecu, ecuA);
+    if(num>0)
+        EliminarArbol((p_ecuac->arbol_ecu)); //eliminar arbol anterior en caso de reemplazarlo
     *p_ecuac=aux_ecuacion;
 
 
     Vector ecuac_token;
-    tokenizar(&ecuac_token,ecuU); //TOKENIZAMOS ecuU (la ecuacion actual)
+    tokenizar(&ecuac_token,ecuA); //TOKENIZAMOS ecuA (la ecuacion actual)
 
     puts("");
     printtoken(&ecuac_token);
@@ -284,7 +330,7 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
 
     postfija(&ecuac_token); //PASAMOS EL TOKEN A POSTFIJA
     CrearArbol(&ecuac_token,&(p_ecuac->arbol_ecu)); //CREAMOS EL ARBOL CON LOS DATOS DE LA ECUACION
-
+    
 
     inorder(p_ecuac->arbol_ecu, mostrar_char, mostrar_double); //printea el arbol inorder
 
@@ -295,6 +341,174 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
 return 0;
 }
 
+double evaluarArbol(struct nodo* arbol, double x, double y) {
+    if (arbol == NULL) return 0; // seguridad
+
+    switch (arbol->tipo) {
+        case NUMERO:
+            return arbol->numero;
+
+        case VARIABLE:
+            return (arbol->variable == 'x') ? x : y;
+
+        case OPERADOR: {
+            double izq = evaluarArbol(arbol->op.izq, x, y);
+            double der = evaluarArbol(arbol->op.der, x, y);
+
+            switch (arbol->op.operador) {
+                case '+': return izq + der;
+                case '-': return izq - der;
+                case '*': return izq * der;
+                case '/': return der != 0 ? izq / der : 0; // proteger división por cero
+                case '^': return pow(izq, der);
+                default: return 0; // operador desconocido
+            }
+        }
+    }
+
+    return 0; // caso no reconocido
+}
+
+void EvaluarXeY(ecuacion *ecu,size_t cecu){
+    int i=0;
+    char op='a';
+    double x,y, resultado;
+    ecuacion *p_ecu=ecu;
+    mostrarecuaciones(ecu,cecu);
+    printf("\nIngrese el numero que quiera evaluar: ");
+    do{
+        scanf("%d",&i);
+        if(i<0 || i>cecu)
+            printf("\nIngrese una ecuacion valida: ");
+    }while(i<0 || i>cecu);
+
+    p_ecu+=(i-1);
+    printf("\nusted selecciono: %s", p_ecu->ecu);
+
+    while(op!='N'){
+        printf("\nIngrese el valor de x: ");
+        scanf("%lf",&x);
+        printf("\ningrese valor de y: ");
+        scanf("%lf",&y);
+        resultado = evaluarArbol(p_ecu->arbol_ecu, x, y);
+        if (fabs(resultado) < 0.001) {
+            printf("El x=%.2f e y=%.2f pertenecen a la ecuación\n", x, y);
+        } else {
+            printf("El x=%.2f e y=%.2f NO pertenecen a la ecuación\n", x, y);
+        }
+        op=pedir_opcion("SN","Quiere ingresar otros valores para X e Y? S/N: ");
+    }
+}
+
+#include <math.h>
+#include <stdio.h>
+
+#define MAX_ITER 100
+#define EPSILON 1e-6
+
+// Busca la raíz f(x, y) = 0, donde se fija una variable y se calcula la otra
+// Retorna 1 si se encuentra una solución, 0 si no.
+// 'rango' define el intervalo: [-rango, rango]
+int encontrar_variable_dependiente(nodo *arbol,char variable_fija,double valor_fijo,double *resultado,double rango){
+    
+    double min = -rango;
+    double max = rango;
+
+    double f_min = evaluarArbol(arbol,
+        (variable_fija == 'x') ? valor_fijo : min,
+        (variable_fija == 'y') ? valor_fijo : min);
+
+    double f_max = evaluarArbol(arbol,
+        (variable_fija == 'x') ? valor_fijo : max,
+        (variable_fija == 'y') ? valor_fijo : max);
+
+    if (f_min * f_max > 0) {
+        // No hay cambio de signo en el intervalo: no hay raíz
+        return 0;
+    }
+
+    // Método de bisección
+    for (int i = 0; i < MAX_ITER; i++) {
+        double medio = (min + max) / 2.0;
+        double f_medio = evaluarArbol(arbol,
+            (variable_fija == 'x') ? valor_fijo : medio,
+            (variable_fija == 'y') ? valor_fijo : medio);
+
+        if (fabs(f_medio) < EPSILON) {
+            *resultado = medio;
+            return 1;
+        }
+
+        double f_izq = evaluarArbol(arbol,
+            (variable_fija == 'x') ? valor_fijo : min,
+            (variable_fija == 'y') ? valor_fijo : min);
+
+        if (f_izq * f_medio < 0)
+            max = medio;
+        else
+            min = medio;
+    }
+
+    return 0; // no se encontró dentro de la precisión
+}
+
+/*
+void GenerarTabla(ecuacion* ecu,size_t cecu){
+    int i=0;
+    char op='a', incognita;
+    double x,y, resultado, paso, num;;
+    ecuacion *p_ecu=ecu;
+    mostrarecuaciones(ecu,cecu);
+    printf("\nIngrese el numero que quiera evaluar: ");
+    do{
+        scanf("%d",&i);
+        if(i<0 || i>cecu)
+            printf("\nIngrese una ecuacion valida: ");
+    }while(i<0 || i>cecu);
+
+    p_ecu+=(i-1);
+
+    printf("\nusted selecciono: %s", p_ecu->ecu);
+    incognita=pedir_opcion("XY","\nQue incognita va a usar (X o Y): ");
+
+    printf("\nFije el valor para %c: ", incognita);
+    if(incognita=='X'){
+        scanf("%lf",&x);
+    }
+    else{
+        scanf("%lf",&y);
+    }
+
+    printf("\nQue paso va a tener la tabla: ");
+    do{
+        printf("%lf", &paso);
+        if(paso<0);
+            printf("\nIngrese un paso valido: ");
+    }while(paso<0);
+
+    
+    
+    if(incognita=='X'){
+        num=x-5*paso;
+    }
+    else{
+        num=y-5*paso;
+    }
+    for(i=0;i<10;i++){
+        
+        if(incognita=='X')
+            resultado = evaluarArbol(p_ecu->arbol_ecu, x, num);
+        else
+            resultado = evaluarArbol(p_ecu->arbol_ecu, num, y);
+        
+        printf;
+
+
+
+        num+=paso;
+    }
+}
+*/
 void ayuda(){
     puts("INTRODUCIR ECUACIONES SIGUIENDO LAS SIGUIENTES REGLAS PARA EL CORRECTO FUNCIONAMIENTO DEL PROGRAMA:");
     puts("VARIABLES: Solo se acepta X e Y.");
