@@ -344,6 +344,7 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
 return 0;
 }
 
+
 double evaluarArbol(struct nodo* arbol, double x, double y) {
     if (arbol == NULL) return 0; // seguridad
 
@@ -362,7 +363,11 @@ double evaluarArbol(struct nodo* arbol, double x, double y) {
                 case '+': return izq + der;
                 case '-': return izq - der;
                 case '*': return izq * der;
-                case '/': return der != 0 ? izq / der : 0; // proteger division por cero
+                case '/': 
+                    if (fabs(der) < 1e-9) // Si el denominador es muy cercano a cero
+                        return izq / 1e-9;
+                    else
+                        return izq / der;
                 case '^': return pow(izq, der);
                 default: return 0; // operador desconocido
             }
@@ -371,6 +376,7 @@ double evaluarArbol(struct nodo* arbol, double x, double y) {
 
     return 0; // caso no reconocido
 }
+
 
 void graficar(ecuacion* ecuaciones, size_t cecu, int* indice){
     double x_min, x_max, y_min, y_max;
