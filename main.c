@@ -28,6 +28,8 @@ int main()
 
                     if(subop=='B'){
                         ingresarecu(ecuaciones, &cecu,2,0);
+                        printf("\nEcuacion modificada correctamente.\n");
+                        EnterParaSalir();
                         break;
                     }
                     if(subop=='X'){
@@ -36,6 +38,8 @@ int main()
                 }
                 if(ingresarecu(ecuaciones, &cecu,1,0))
                     puts("No se pudo aniadir ecuacion");
+                printf("\nEcuacion ingresada correctamente.\n");
+                EnterParaSalir();
                 break;
             case 'B':
                 mostrarecuaciones(ecuaciones, cecu,1);
