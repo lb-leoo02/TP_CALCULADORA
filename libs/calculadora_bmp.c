@@ -110,8 +110,6 @@ void graficar_ecuacion(ecuacion* ecuaciones, int indice,
     free(datos);
 }
 
-// Puedes agregar esto en calculadora.c o en un archivo aparte
-
 void graficar_ecuacion_consola(ecuacion* ecuaciones, int indice, double x_min, double x_max, double y_min, double y_max) {
     int ancho = 80;   // columnas de la consola
     int alto = 30;    // filas de la consola
