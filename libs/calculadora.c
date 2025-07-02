@@ -690,9 +690,12 @@ void TablaAlrededorDeValor(ecuacion *ecu, size_t cecu) {
     scanf("%lf", &paso);
     limpiarBuffer();
     if (paso <= 0) paso = 1;
-
+    
+    limpiarPantalla();
+    printf("\n--- TABLA DE VALORES ---\n");
+    
     if (variable == 'X') {
-        printf("\nTabla de valores para X en el rango [%.2f, %.2f]:\n", valor - 5 * paso, valor + 5 * paso);
+        printf("\nTabla de valores para X de la funcion %s\nen el rango [%.2f, %.2f]:\n",p_ecu->ecu, valor - 5 * paso, valor + 5 * paso);
         printf("X\tY (tal que f(x,y)=0)\n");
         int j;
         for (j = -5; j <= 5; j++) {
