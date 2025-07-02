@@ -774,19 +774,13 @@ void BuscarRaices(ecuacion *ecu, size_t cecu) {
 
 
 void ayuda_ecuacion(){
-    puts("Escribir ecuacion:");
-    puts("  Permite ingresar una nueva ecuacion o modificar una existente.");
     puts("  Limitaciones y reglas para las ecuaciones:");
     puts("    - Solo se aceptan las variables X e Y (mayusculas o minusculas).");
     puts("    - Operadores permitidos: +, -, *, /, ^, =.");
-    puts("    - Debe haber exactamente un signo igual '=' en la ecuacion.");
     puts("    - Debe haber al menos una X y una Y.");
-    puts("    - Los parentesis deben estar correctamente balanceados.");
-    puts("    - No se permiten dos operadores seguidos.");
     puts("    - No puede haber division por cero.");
     puts("    - Las potencias deben escribirse con '^' y parentesis, por ejemplo: x^(2).");
     puts("    - Las raices se escriben como potencias fraccionarias, por ejemplo: y^(1/2).");
-    puts("    - No se permiten caracteres no reconocidos.");
     puts("");
     puts("Ejemplo valido: x^2 + y^2 = 1");
 }
@@ -813,6 +807,8 @@ void menu_ayuda_interactivo() {
         limpiarPantalla();
         switch(op) {
             case 'A':
+                puts("Escribir ecuacion:");
+                puts("  Permite ingresar una nueva ecuacion o modificar una existente.");
                 ayuda_ecuacion();
                 break;
             case 'B':
@@ -847,7 +843,7 @@ void menu_ayuda_interactivo() {
                     subop = getchar();
                     limpiarBuffer();
                     subop = Amayus(subop);
-            
+
                     limpiarPantalla();
                     switch(subop) {
                         case 'A':
@@ -884,7 +880,7 @@ void menu_ayuda_interactivo() {
                 } while(subop != 'X');
                 break;
             }
-                
+
             case 'G':
                 puts("Graficar ecuacion:");
                 puts("  Permite graficar la ecuacion seleccionada en un rango dado para X e Y.");
@@ -901,3 +897,4 @@ void menu_ayuda_interactivo() {
         }
     } while(op != 'X');
 }
+
