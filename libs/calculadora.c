@@ -96,6 +96,8 @@ char menu(){
     printf("[H] - Ayuda\n");
     printf("[X] - Salir\n");
     printf("Seleccione una opcion: ");
+
+
     do {
         letra = getchar();            // Lee un solo caracter
         limpiarBuffer();             // Descarta el resto de la linea
@@ -192,6 +194,15 @@ int verificarecuacion(char* ecu){
 
 return ECUACION_OK;
 }
+
+void Amin(char* ecu) {
+    char *p_ecu = ecu;
+    while (*p_ecu) {
+        *p_ecu = tolower(*p_ecu);
+        p_ecu++;
+    }
+}
+
 void introducirecuacion(char* ecu) {
     EstadoEcuacion estado;
     char confirmacion;
@@ -200,6 +211,7 @@ void introducirecuacion(char* ecu) {
         printf("Introduzca una ecuacion: ");
         fgets(ecu, TAM_ECU, stdin);
         quitarenter(ecu);
+        Amin(ecu);
         printf("\nEcuacion: %s",ecu);
         printf("\nDesea introducir esta ecuacion? S/N: ");
         do{
@@ -344,7 +356,6 @@ int ingresarecu(ecuacion *ecuac, size_t *cecu, int ingreso, void*ecuarch){
 return 0;
 }
 
-
 double evaluarArbol(struct nodo* arbol, double x, double y) {
     if (arbol == NULL) return 0; // seguridad
 
@@ -363,7 +374,7 @@ double evaluarArbol(struct nodo* arbol, double x, double y) {
                 case '+': return izq + der;
                 case '-': return izq - der;
                 case '*': return izq * der;
-                case '/': 
+                case '/':
                     if (fabs(der) < 1e-9) // Si el denominador es muy cercano a cero
                         return izq / 1e-9;
                     else
@@ -377,7 +388,6 @@ double evaluarArbol(struct nodo* arbol, double x, double y) {
     return 0; // caso no reconocido
 }
 
-
 void graficar(ecuacion* ecuaciones, size_t cecu, int* indice){
     double x_min, x_max, y_min, y_max;
     limpiarPantalla();
@@ -390,15 +400,26 @@ void graficar(ecuacion* ecuaciones, size_t cecu, int* indice){
         puts("Indice invalido.");
         return;
     }
-                
+
     printf("Ingrese el limite inferior de X: ");
     scanf("%lf", &x_min);
     printf("Ingrese el limite superior de X: ");
-    scanf("%lf", &x_max);
+    do{
+        scanf("%lf", &x_max);
+        if(x_max <=x_min) {
+            printf("El limite superior debe ser mayor que el limite inferior. Intente de nuevo: ");
+        }
+    }while(x_max <= x_min);
+
     printf("Ingrese el limite inferior de Y: ");
     scanf("%lf", &y_min);
     printf("Ingrese el limite superior de Y: ");
-    scanf("%lf", &y_max);
+    do{
+        scanf("%lf", &y_max);
+        if(y_max <= y_min) {
+            printf("El limite superior debe ser mayor que el limite inferior. Intente de nuevo: ");
+        }
+    }while(y_max <= y_min);
     limpiarBuffer();
 
     graficar_ecuacion(ecuaciones, *indice-1, x_min, x_max, y_min, y_max);
@@ -407,150 +428,45 @@ void graficar(ecuacion* ecuaciones, size_t cecu, int* indice){
     EnterParaSalir();
 }
 
-void EvaluarXeY(ecuacion *ecu,size_t cecu){
-    int i=0;
-    char op='a';
-    double x,y, resultado;
-    ecuacion *p_ecu=ecu;
-    limpiarPantalla();
-    printf("\n--- EVALUAR ECUACION ---\n");
-    mostrarecuaciones(ecu,cecu,0);
-    printf("\nIngrese el numero  de ecuacion que quiera evaluar: ");
-    do{
-        scanf("%d",&i);
-        if(i<0 || i>cecu)
-            printf("\nIngrese una ecuacion valida: ");
-    }while(i<0 || i>cecu);
-
-    p_ecu+=(i-1);
-    printf("\nusted selecciono: %s", p_ecu->ecu);
-
-    while(op!='N'){
-        printf("\nIngrese el valor de x: ");
-        scanf("%lf",&x);
-        printf("\ningrese valor de y: ");
-        scanf("%lf",&y);
-        limpiarBuffer();
-        resultado = evaluarArbol(p_ecu->arbol_ecu, x, y);
-        if (fabs(resultado) < 0.001) {
-            printf("El x=%.2f e y=%.2f pertenecen a la ecuacion\n", x, y);
-        } else {
-            printf("El x=%.2f e y=%.2f NO pertenecen a la ecuacion\n", x, y);
-        }
-        op=pedir_opcion("SN","Quiere ingresar otros valores para X e Y? S/N: ");
-        if(op=='S'){
-            limpiarPantalla();
-            printf("\n--- EVALUAR ECUACION ---\n");
-            printf("\nEcuacion: %s", p_ecu->ecu);
-        }
-    }
-}
-
-double buscar_y_para_x(nodo* arbol, double x, double y_min, double y_max, double tolerancia, int max_iter) {
-    double a = y_min, b = y_max, fa, fb, fm, m;
+double buscar_raiz(nodo* arbol, double fijo, double min, double max, double tolerancia, int max_iter, int buscar_y) {
+    double a = min, b = max, fa, fb, fm, m;
     int iter = 0;
 
-    fa = evaluarArbol(arbol, x, a);
-    fb = evaluarArbol(arbol, x, b);
+    fa = buscar_y ? evaluarArbol(arbol, fijo, a) : evaluarArbol(arbol, a, fijo);
+    fb = buscar_y ? evaluarArbol(arbol, fijo, b) : evaluarArbol(arbol, b, fijo);
 
-    if (fa * fb > 0) {
-        // No hay raiz en el intervalo
-        return NAN;
-    }
+    if (fa * fb > 0) return NAN;
 
     while ((b - a) > tolerancia && iter < max_iter) {
         m = (a + b) / 2.0;
-        fm = evaluarArbol(arbol, x, m);
+        fm = buscar_y ? evaluarArbol(arbol, fijo, m) : evaluarArbol(arbol, m, fijo);
 
         if (fa * fm < 0) {
-            b = m;
-            fb = fm;
+            b = m; fb = fm;
         } else {
-            a = m;
-            fa = fm;
+            a = m; fa = fm;
         }
         iter++;
     }
     return (a + b) / 2.0;
 }
 
-double buscar_x_para_y(nodo* arbol, double y, double x_min, double x_max, double tolerancia, int max_iter) {
-    double a = x_min, b = x_max, fa, fb, fm, m;
-    int iter = 0;
-
-    fa = evaluarArbol(arbol, a, y);
-    fb = evaluarArbol(arbol, b, y);
-
-    if (fa * fb > 0) {
-        // No hay raiz en el intervalo
-        return NAN;
-    }
-
-    while ((b - a) > tolerancia && iter < max_iter) {
-        m = (a + b) / 2.0;
-        fm = evaluarArbol(arbol, m, y);
-
-        if (fa * fm < 0) {
-            b = m;
-            fb = fm;
-        } else {
-            a = m;
-            fa = fm;
-        }
-        iter++;
-    }
-    return (a + b) / 2.0;
-}
-
-// Barrido automatico para encontrar subintervalo con cambio de signo
-double buscar_y_para_x_auto(nodo* arbol, double x, double y_min, double y_max, double tolerancia, int max_iter) {
-    double paso = (y_max - y_min) / 100.0;
-    double a = y_min, b = a + paso;
-    double fa = evaluarArbol(arbol, x, a);
-    for (; b <= y_max; a += paso, b += paso) {
-        double fb = evaluarArbol(arbol, x, b);
-        if (fa * fb <= 0) {
-            // Hay cambio de signo, aplicar biseccion aqui
-            return buscar_y_para_x(arbol, x, a, b, tolerancia, max_iter);
-        }
-        fa = fb;
-    }
-    return NAN;
-}
-
-double buscar_x_para_y_auto(nodo* arbol, double y, double x_min, double x_max, double tolerancia, int max_iter) {
-    double paso = (x_max - x_min) / 100.0;
-    double a = x_min, b = a + paso;
-    double fa = evaluarArbol(arbol, a, y);
-    for (; b <= x_max; a += paso, b += paso) {
-        double fb = evaluarArbol(arbol, b, y);
-        if (fa * fb <= 0) {
-            // Hay cambio de signo, aplicar biseccion aqui
-            return buscar_x_para_y(arbol, y, a, b, tolerancia, max_iter);
-        }
-        fa = fb;
-    }
-    return NAN;
-}
-// Buscar todas las raices de y para un x dado
-int buscar_y_para_x_multi(nodo* arbol, double x, double y_min, double y_max, double tolerancia, int max_iter, double* soluciones, int max_sol) {
-    double paso = (y_max - y_min) / 1000.0;
+int buscar_raiz_multi(nodo* arbol, double fijo, double min, double max, double tolerancia, int max_iter, double* soluciones, int max_sol, int buscar_y) {
+    double paso = (max - min) / 1000.0;
     int n_sol = 0;
-    double a = y_min, b = a + paso;
-    double fa = evaluarArbol(arbol, x, a);
+    double a = min, b = a + paso;
+    double fa = buscar_y ? evaluarArbol(arbol, fijo, a) : evaluarArbol(arbol, a, fijo);
     double *p_sol = soluciones;
 
-    while (b <= y_max && n_sol < max_sol) {
-        double fb = evaluarArbol(arbol, x, b);
+    while (b <= max && n_sol < max_sol) {
+        double fb = buscar_y ? evaluarArbol(arbol, fijo, b) : evaluarArbol(arbol, b, fijo);
 
         // Raiz exacta en a
         if (fabs(fa) < tolerancia) {
-            double *p_check = soluciones;
             int duplicado = 0;
-            while (p_check < p_sol) {
+            for (double *p_check = soluciones; p_check < p_sol; p_check++) {
                 if (fabs(*p_check - a) < tolerancia * 2)
                     duplicado = 1;
-                p_check++;
             }
             if (!duplicado) {
                 *p_sol = a;
@@ -560,12 +476,10 @@ int buscar_y_para_x_multi(nodo* arbol, double x, double y_min, double y_max, dou
         }
         // Raiz exacta en b
         if (fabs(fb) < tolerancia) {
-            double *p_check = soluciones;
             int duplicado = 0;
-            while (p_check < p_sol) {
+            for (double *p_check = soluciones; p_check < p_sol; p_check++) {
                 if (fabs(*p_check - b) < tolerancia * 2)
                     duplicado = 1;
-                p_check++;
             }
             if (!duplicado) {
                 *p_sol = b;
@@ -575,16 +489,14 @@ int buscar_y_para_x_multi(nodo* arbol, double x, double y_min, double y_max, dou
         }
         // Cambio de signo
         if (fa * fb < 0) {
-            double y = buscar_y_para_x(arbol, x, a, b, tolerancia, max_iter);
-            double *p_check = soluciones;
+            double raiz = buscar_raiz(arbol, fijo, a, b, tolerancia, max_iter, buscar_y);
             int duplicado = 0;
-            while (p_check < p_sol) {
-                if (fabs(*p_check - y) < tolerancia * 2)
+            for (double *p_check = soluciones; p_check < p_sol; p_check++) {
+                if (fabs(*p_check - raiz) < tolerancia * 2)
                     duplicado = 1;
-                p_check++;
             }
             if (!duplicado) {
-                *p_sol = y;
+                *p_sol = raiz;
                 p_sol++;
                 n_sol++;
             }
@@ -596,70 +508,33 @@ int buscar_y_para_x_multi(nodo* arbol, double x, double y_min, double y_max, dou
     return n_sol;
 }
 
-// Buscar todas las raices de x para un y dado
-int buscar_x_para_y_multi(nodo* arbol, double y, double x_min, double x_max, double tolerancia, int max_iter, double* soluciones, int max_sol) {
-    double paso = (x_max - x_min) / 1000.0;
-    int n_sol = 0;
-    double a = x_min, b = a + paso;
-    double fa = evaluarArbol(arbol, a, y);
-    double *p_sol = soluciones;
-
-    while (b <= x_max && n_sol < max_sol) {
-        double fb = evaluarArbol(arbol, b, y);
-
-        // Raiz exacta en a
-        double *p_check = soluciones;
-        int duplicado = 0;
-        if (fabs(fa) < tolerancia) {
-            while (p_check < p_sol) {
-                if (fabs(*p_check - a) < tolerancia * 2)
-                    duplicado = 1;
-                p_check++;
+double leer_fraccion_o_decimal(const char* prompt) { //1/2=0.5
+    char buffer[64];
+    double resultado = 0.0;
+    int valido = 0;
+    while (!valido) {
+        printf("%s", prompt);
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) continue;
+        char* barra = strchr(buffer, '/');
+        if (barra) {
+            // Es una fracción
+            *barra = '\0';
+            double num = atof(buffer);
+            double den = atof(barra + 1);
+            if (den != 0) {
+                resultado = num / den;
+                valido = 1;
+            } else {
+                printf("Denominador no puede ser cero.\n");
             }
-            if (!duplicado) {
-                *p_sol = a;
-                p_sol++;
-                n_sol++;
-            }
+        } else {
+            // Es decimal
+            resultado = atof(buffer);
+            valido = 1;
         }
-        // Raiz exacta en b
-        p_check = soluciones;
-        duplicado = 0;
-        if (fabs(fb) < tolerancia) {
-            while (p_check < p_sol) {
-                if (fabs(*p_check - b) < tolerancia * 2)
-                    duplicado = 1;
-                p_check++;
-            }
-            if (!duplicado) {
-                *p_sol = b;
-                p_sol++;
-                n_sol++;
-            }
-        }
-        // Cambio de signo
-        p_check = soluciones;
-        duplicado = 0;
-        if (fa * fb < 0) {
-            double x = buscar_x_para_y(arbol, y, a, b, tolerancia, max_iter);
-            while (p_check < p_sol) {
-                if (fabs(*p_check - x) < tolerancia * 2)
-                    duplicado = 1;
-                p_check++;
-            }
-            if (!duplicado) {
-                *p_sol = x;
-                p_sol++;
-                n_sol++;
-            }
-        }
-        a += paso;
-        b += paso;
-        fa = fb;
     }
-    return n_sol;
+    return resultado;
 }
-
 void TablaAlrededorDeValor(ecuacion *ecu, size_t cecu) {
     int i = 0;
     double valor, paso = 1.0;
@@ -683,17 +558,12 @@ void TablaAlrededorDeValor(ecuacion *ecu, size_t cecu) {
 
     variable = pedir_opcion("XY", "¿Sobre que variable desea generar la tabla? (X/Y): ");
 
-    printf("Ingrese el valor central para %c: ", variable);
-    scanf("%lf", &valor);
-
-    printf("Ingrese el paso (incremento) para la tabla: ");
-    scanf("%lf", &paso);
-    limpiarBuffer();
+    valor = leer_fraccion_o_decimal("Ingrese el valor central para la variable: ");
+    paso = leer_fraccion_o_decimal("Ingrese el paso: ");
     if (paso <= 0) paso = 1;
-    
+
     limpiarPantalla();
     printf("\n--- TABLA DE VALORES ---\n");
-    
     if (variable == 'X') {
         printf("\nTabla de valores para X de la funcion %s\nen el rango [%.2f, %.2f]:\n",p_ecu->ecu, valor - 5 * paso, valor + 5 * paso);
         printf("X\tY (tal que f(x,y)=0)\n");
@@ -701,14 +571,19 @@ void TablaAlrededorDeValor(ecuacion *ecu, size_t cecu) {
         for (j = -5; j <= 5; j++) {
             double x = valor + j * paso;
             double soluciones[10];
-            int n_sol = buscar_y_para_x_multi(p_ecu->arbol_ecu, x, -100, 100, 1e-6, 100, soluciones, 10);
-            printf("%.2f\t", x);
+            double *p_sol = soluciones;
+            int n_sol = buscar_raiz_multi(p_ecu->arbol_ecu, x, -100, 100, 1e-6, 100, soluciones, 10, 1);
+            printf("%.6f\t", x);
             if (n_sol == 0)
                 printf("No hay solucion\n");
             else {
-                int k;
-                for (k = 0; k < n_sol; k++)
-                    printf("%.6f%s", soluciones[k], (k < n_sol - 1) ? " | " : "");
+                double *p_fin = soluciones + n_sol;
+                while (p_sol < p_fin) {
+                    printf("%.6f", *p_sol);
+                    if (p_sol < p_fin - 1)
+                        printf(" | ");
+                    p_sol++;
+                }
                 printf("\n");
             }
         }
@@ -719,14 +594,19 @@ void TablaAlrededorDeValor(ecuacion *ecu, size_t cecu) {
         for (j = -5; j <= 5; j++) {
             double y = valor + j * paso;
             double soluciones[10];
-            int n_sol = buscar_x_para_y_multi(p_ecu->arbol_ecu, y, -100, 100, 1e-6, 100, soluciones, 10);
-            printf("%.2f\t", y);
+            double *p_sol = soluciones;
+            int n_sol = buscar_raiz_multi(p_ecu->arbol_ecu, y, -100, 100, 1e-6, 100, soluciones, 10, 0);
+            printf("%.6f\t", y);
             if (n_sol == 0)
                 printf("No hay solucion\n");
             else {
-                int k;
-                for (k = 0; k < n_sol; k++)
-                    printf("%.6f%s", soluciones[k], (k < n_sol - 1) ? " | " : "");
+                double *p_fin = soluciones + n_sol;
+                while (p_sol < p_fin) {
+                    printf("%.6f", *p_sol);
+                    if (p_sol < p_fin - 1)
+                        printf(" | ");
+                    p_sol++;
+                }
                 printf("\n");
             }
         }
@@ -738,11 +618,12 @@ void BuscarRaices(ecuacion *ecu, size_t cecu) {
     int variable;
     ecuacion *p_ecu = ecu;
     double soluciones[20];
-    int n_sol, k;
+    double *p_sol, *p_fin;
+    int n_sol;
     limpiarPantalla();
     printf("\n--- BUSCAR RAICES ---\n");
 
-    mostrarecuaciones(ecu, cecu,0);
+    mostrarecuaciones(ecu, cecu, 0);
     printf("\nIngrese el numero de ecuacion que quiera analizar: ");
     do {
         scanf("%d", &i);
@@ -756,31 +637,144 @@ void BuscarRaices(ecuacion *ecu, size_t cecu) {
     variable = pedir_opcion("XY", "¿Buscar raices respecto a que variable? (X/Y): ");
 
     if (variable == 'X') {
-        // Buscamos raices de f(x,0)=0 en el rango -100 a 100
-        n_sol = buscar_x_para_y_multi(p_ecu->arbol_ecu, 0, -100, 100, 1e-6, 100, soluciones, 20);
+        n_sol = buscar_raiz_multi(p_ecu->arbol_ecu, 0, -100, 100, 1e-6, 100, soluciones, 20, 0);
         printf("\nRaices para X (f(x,0)=0):\n");
         if (n_sol == 0)
             printf("No se encontraron raices reales en el rango.\n");
         else {
-            for (k = 0; k < n_sol; k++)
-                printf("x = %.6f\n", soluciones[k]);
+            p_sol = soluciones;
+            p_fin = soluciones + n_sol;
+            while (p_sol < p_fin) {
+                printf("x = %.6f\n", *p_sol);
+                p_sol++;
+            }
         }
     } else {
-        // Buscamos raices de f(0,y)=0 en el rango -100 a 100
-        n_sol = buscar_y_para_x_multi(p_ecu->arbol_ecu, 0, -100, 100, 1e-6, 100, soluciones, 20);
+        n_sol = buscar_raiz_multi(p_ecu->arbol_ecu, 0, -100, 100, 1e-6, 100, soluciones, 20, 1);
         printf("\nRaices para Y (f(0,y)=0):\n");
         if (n_sol == 0)
             printf("No se encontraron raices reales en el rango.\n");
         else {
-            for (k = 0; k < n_sol; k++)
-                printf("y = %.6f\n", soluciones[k]);
+            p_sol = soluciones;
+            p_fin = soluciones + n_sol;
+            while (p_sol < p_fin) {
+                printf("y = %.6f\n", *p_sol);
+                p_sol++;
+            }
         }
     }
+}
+void EvaluarListaDeValores(ecuacion *ecu, size_t cecu) {
+    int i = 0;
+    int variable;
+    ecuacion *p_ecu = ecu;
+    double valores[100];
+    double *p_val = valores;
+    char buffer[64], *p_buffer=buffer;
 
+    limpiarPantalla();
+    printf("\n--- TABLA DE VALORES (LISTA PERSONALIZADA) ---\n");
+
+    mostrarecuaciones(ecu, cecu, 0);
+    printf("\nIngrese el numero de ecuacion que quiera evaluar: ");
+    do {
+        scanf("%d", &i);
+        limpiarBuffer();
+        if (i < 1 || i > cecu)
+            printf("\nIngrese una ecuacion valida: ");
+    } while (i < 1 || i > cecu);
+
+    p_ecu += (i - 1);
+    printf("\nUsted selecciono: %s\n", p_ecu->ecu);
+
+    variable = pedir_opcion("XY", "¿Sobre que variable desea ingresar valores? (X/Y): ");
+
+    printf("Ingrese los valores para %c (uno por linea, puede usar fracciones, termine con X):\n", variable);
+    while (p_val < valores + 100) {
+        printf("%c[%ld]: ", variable, (long)(p_val - valores) + 1);
+        if (!fgets(buffer, sizeof(buffer), stdin)) break;
+        if (*p_buffer == 'X' || *p_buffer == 'x') break;
+        buffer[strcspn(buffer, "\n")] = 0;
+        if (strlen(buffer) == 0) continue;
+        char* barra = strchr(buffer, '/');
+        double valor;
+        if (barra) {
+            *barra = '\0';
+            double num = atof(buffer);
+            double den = atof(barra + 1);
+            if (den == 0) {
+                printf("Denominador no puede ser cero.\n");
+                continue;
+            }
+            valor = num / den;
+        } else {
+            valor = atof(buffer);
+        }
+        *p_val = valor;
+        p_val++;
+    }
+
+    limpiarPantalla();
+    printf("\n--- TABLA DE VALORES ---\n");
+    if (variable == 'X') {
+        printf("\nTabla de valores para X de la funcion %s (f(x,y)=0):\n", p_ecu->ecu);
+        printf("X\tY (tal que f(x,y)=0)\n");
+        double *p_iter = valores;
+        while (p_iter < p_val) {
+            double x = *p_iter;
+            double soluciones[10];
+            double *p_sol = soluciones;
+            int n_sol = buscar_raiz_multi(p_ecu->arbol_ecu, x, -100, 100, 1e-6, 100, soluciones, 10, 1);
+            printf("%.6f\t", x);
+            int printed = 0;
+            double *p_fin_sol = soluciones + n_sol;
+            while (p_sol < p_fin_sol) {
+                double y = *p_sol;
+                double fxy = evaluarArbol(p_ecu->arbol_ecu, x, y);
+                if (!isnan(fxy) && !isinf(fxy) && fabs(fxy) < 1e-4) {
+                    if (printed)
+                        printf(" | ");
+                    printf("%.6f", y);
+                    printed = 1;
+                }
+                p_sol++;
+            }
+            if (!printed)
+                printf("No hay solucion");
+            printf("\n");
+            p_iter++;
+        }
+    } else {
+        printf("\nTabla de valores para Y de la funcion %s (f(x,y)=0):\n", p_ecu->ecu);
+        printf("Y\tX (tal que f(x,y)=0)\n");
+        double *p_iter = valores;
+        while (p_iter < p_val) {
+            double y = *p_iter;
+            double soluciones[10];
+            double *p_sol = soluciones;
+            int n_sol = buscar_raiz_multi(p_ecu->arbol_ecu, y, -100, 100, 1e-6, 100, soluciones, 10, 0);
+            printf("%.6f\t", y);
+            int printed = 0;
+            double *p_fin_sol = soluciones + n_sol;
+            while (p_sol < p_fin_sol) {
+                double x = *p_sol;
+                double fxy = evaluarArbol(p_ecu->arbol_ecu, x, y);
+                if (!isnan(fxy) && !isinf(fxy) && fabs(fxy) < 1e-4) {
+                    if (printed)
+                        printf(" | ");
+                    printf("%.6f", x);
+                    printed = 1;
+                }
+                p_sol++;
+            }
+            if (!printed)
+                printf("No hay solucion");
+            printf("\n");
+            p_iter++;
+        }
+    }
     EnterParaSalir();
 }
-
-
 
 void ayuda_ecuacion(){
     puts("  Limitaciones y reglas para las ecuaciones:");
@@ -843,6 +837,7 @@ void menu_ayuda_interactivo() {
                     limpiarPantalla();
                     puts("Resolver ecuacion:");
                     puts("  Permite trabajar con una ecuacion seleccionada de las cargadas en memoria.");
+                    puts("  Las funciones estan acotadas de [-100;100] por lo que podria ser indefinido el resultado mayor a ese intervalo.");
                     puts("  Opciones disponibles:");
                     puts("    [A] Evaluar la ecuacion para valores dados de X e Y");
                     puts("    [B] Generar una tabla de valores");
@@ -906,4 +901,3 @@ void menu_ayuda_interactivo() {
         }
     } while(op != 'X');
 }
-
