@@ -150,4 +150,3 @@ void graficar_ecuacion_consola(ecuacion* ecuaciones, int indice, double x_min, d
     for(int i=0; i<alto; i++)
         printf("%s\n", matriz[i]);
 }
-
