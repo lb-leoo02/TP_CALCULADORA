@@ -184,9 +184,9 @@ int postfija(Vector* t){
     vectorIteradorPrimero(&it_token);
 
     while (!vectorIteradorFinIter(&it_token)) {
-        Token* tok_act = vectorIteradorActual(&it_token);
+        Token* tok_act = vectorIteradorActual(&it_token); //(3*x+2*y)*5=0
 
-        if (tok_act->tipo == TOKEN_NUM || tok_act->tipo == TOKEN_VAR) {
+        if (tok_act->tipo == TOKEN_NUM || tok_act->tipo == TOKEN_VAR) { //
             vectorInsertarAlFinal(&salida, tok_act);
         }
         else if (tok_act->tipo == TOKEN_OP) {
