@@ -5,7 +5,7 @@
 #include "libs/calculadora_bmp.h"
 int main()
 {
-    ecuacion ecuaciones[10]; 
+    ecuacion ecuaciones[10];
     size_t cecu=0;
     char op, subop;
     int arch_guardados=0, salir=1;
@@ -61,6 +61,7 @@ int main()
                 break;
             case 'E':
                 borrarArchivos();
+                borrarecuacion(ecuaciones,&cecu);
                 arch_guardados=0;
                 EnterParaSalir();
                 break;
@@ -76,7 +77,7 @@ int main()
                         "Ingrese una opcion: "
                     );
                     if(subop=='A'){
-                        EvaluarXeY(ecuaciones, cecu);
+                        EvaluarListaDeValores(ecuaciones, cecu);
                     }
                     else if(subop=='B'){
                         TablaAlrededorDeValor(ecuaciones,cecu);
@@ -84,15 +85,18 @@ int main()
                     }
                     else if(subop=='C'){
                         BuscarRaices(ecuaciones, cecu);
+                        EnterParaSalir();
                     }
                 }
                 else {
                     puts("No hay ecuaciones cargadas para evaluar.");
+                    EnterParaSalir();
                 }
                 break;
             case 'G':
                 if(cecu == 0) {
                     puts("No hay ecuaciones cargadas para graficar.");
+                    EnterParaSalir();
                     break;
                 }
                 graficar(ecuaciones,cecu,&indice);
