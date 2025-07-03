@@ -38,13 +38,13 @@ int GuardaArchivos(ecuacion* ecu, size_t ce, int* band){
         return 0;
     }
 
-    printf("Elija el nombre con el que se va a guardar el archivo: ");
+    printf("Elija el nombre con el que se va a guardar el archivo (recomendacion:sin la extension .txt): ");
     do{
         fgets(nomArch,NOM_ARCH, stdin);
         quitarenter(nomArch);
         p_nomarch=nomArch;
         if(*p_nomarch=='\0')
-            printf("Ingrese un nombre valido para el archivo: ");
+            printf("Ingrese un nombre valido para el archivo(recomendacion: sin la extension .txt): ");
     }while(*p_nomarch=='\0');
 
     strcpy(nomArch,strcat(nomArch,".txt"));
@@ -95,7 +95,7 @@ int CargarArchivo(ecuacion* ecu, size_t *cecu) {
     FILE *pf;
     int i = 0, band_arch = 1;
     char lineaarch[TAM_ECU], lineausuario[TAM_ECU];
-    
+
     limpiarPantalla();
     printf("\n--- Cargar Archivo ---\n\n");
 
@@ -153,7 +153,7 @@ int borrarArchivos(){
     limpiarPantalla();
     printf("\n--- Borrar Archivos ---\n\n");
     if(!pf_arch){
-        printf("No se encontraron archivos creados\n");
+        printf("No se encontraron archivos creados, se borraron ecuaciones guardadas.\n");
         return 1;
     }
     printf("Se borraran los siguientes archivos:\n");
@@ -164,6 +164,6 @@ int borrarArchivos(){
     }
     fclose(pf_arch);
     remove("NombresArchivos.txt");
-    
+
     return 0;
 }
