@@ -12,8 +12,6 @@ void printtoken(Vector* tok){
     vector_map(tok,print_token);
 }
 
-
-
 int tokenizar(Vector *token, char ecu[]){
     char* p_ecu=ecu; // 3x=*2 
     if(!vectorCrear(token,sizeof(Token))){
@@ -54,6 +52,9 @@ int tokenizar(Vector *token, char ecu[]){
                 else if(*p_ecu=='+'){
                     *p_aux='-';
                 }
+                else {
+                    *p_aux=*p_ecu;
+                }
             }
             else{//=(2+3)
                 *p_aux=*p_ecu;
@@ -84,7 +85,7 @@ int tokenizar(Vector *token, char ecu[]){
         else{
             p_ecu++;
         }
-
+        
         *p_aux='\0';
         if(p_ecu > ecu && *(p_ecu-1)!='=' && vectorInsertarAlFinal(token,&aux) != TODO_OK){
             return 0;
@@ -161,7 +162,7 @@ bool esAsociativoIzq(Token t) {
         case '*':
         case '/':
         case '+':
-        case '-': return true; // los demás son izquierda
+        case '-': return true; // los demas son izquierda
         default: return true;  // por defecto, tratamos como izquierda
     }
 }
@@ -169,7 +170,7 @@ bool esAsociativoIzq(Token t) {
 Token* vectorTope(Vector* v) {
     if (v->ce == 0) // ce = cantidad de elementos
         return NULL;
-    // Obtener puntero al último elemento
+    // Obtener puntero al ultimo elemento
     return (Token*) ((char*)v->vec + (v->ce - 1) * v->tamElem);
 }
 
@@ -183,9 +184,9 @@ int postfija(Vector* t){
     vectorIteradorPrimero(&it_token);
 
     while (!vectorIteradorFinIter(&it_token)) {
-        Token* tok_act = vectorIteradorActual(&it_token);
+        Token* tok_act = vectorIteradorActual(&it_token); //(3*x+2*y)*5=0
 
-        if (tok_act->tipo == TOKEN_NUM || tok_act->tipo == TOKEN_VAR) {
+        if (tok_act->tipo == TOKEN_NUM || tok_act->tipo == TOKEN_VAR) { //
             vectorInsertarAlFinal(&salida, tok_act);
         }
         else if (tok_act->tipo == TOKEN_OP) {
@@ -301,10 +302,10 @@ void linkearnodos(nodo* aux_arbol,nodo *der,nodo *izq){ //aux2=3 aux3=x || x^2
 }
 /*
 
-Recorrer la postfija y construir el árbol usando una pila X
-    Si es número o variable: creás un nodo y lo apilás.
-    Si es operador: desapilás dos nodos, creás uno nuevo con el operador y los
-    dos hijos, y lo apilás.
+Recorrer la postfija y construir el arbol usando una pila X
+    Si es numero o variable: creas un nodo y lo apilas.
+    Si es operador: desapilas dos nodos, creas uno nuevo con el operador y los
+    dos hijos, y lo apilas.
 */
 int CrearArbol(Vector *tok, nodo **Arbol){ //vector=[2] [x] [2] [^] [*] [2] [+]
     Vector pila;

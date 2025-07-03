@@ -1,0 +1,62 @@
+# depslib dependency file v1.0
+1751401369 source:/home/leoopc/Escritorio/tptopicos/libs/arbol_math.c
+	"arbol_math.h"
+	"Vector.h"
+	<stdio.h>
+	<string.h>
+
+1751244694 /home/leoopc/Escritorio/tptopicos/libs/arbol_math.h
+	"Vector.h"
+
+1750254524 /home/leoopc/Escritorio/tptopicos/libs/Vector.h
+	<stddef.h>
+	<stdbool.h>
+	<stdlib.h>
+
+1751407251 source:/home/leoopc/Escritorio/tptopicos/libs/calculadora.c
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	<math.h>
+	"Vector.h"
+	"calculadora.h"
+	<string.h>
+	"Archivos.h"
+
+1751407058 /home/leoopc/Escritorio/tptopicos/libs/calculadora.h
+	<stdio.h>
+	<stdlib.h>
+	"Vector.h"
+	"arbol_math.h"
+
+1750254524 /home/leoopc/Escritorio/tptopicos/libs/Archivos.h
+	"calculadora.h"
+
+1751397983 source:/home/leoopc/Escritorio/tptopicos/libs/calculadora_bmp.c
+	"calculadora.h"
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<math.h>
+
+1750254524 source:/home/leoopc/Escritorio/tptopicos/libs/Vector.c
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"Vector.h"
+
+1751407259 source:/home/leoopc/Escritorio/tptopicos/main.c
+	<stdio.h>
+	<stdlib.h>
+	"libs/calculadora.h"
+	"libs/Archivos.h"
+	"libs/calculadora_bmp.h"
+
+1751396744 /home/leoopc/Escritorio/tptopicos/libs/calculadora_bmp.h
+	"calculadora.h"
+
+1751407648 source:/home/leoopc/Escritorio/tptopicos/libs/Archivos.c
+	"Archivos.h"
+	"calculadora.h"
+	<string.h>
+
