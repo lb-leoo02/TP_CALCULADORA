@@ -33,9 +33,11 @@ void borrarecuacion(ecuacion*, size_t*);
 void destruirecuaciones(ecuacion*, size_t);
 void graficar(ecuacion* ecuaciones, size_t cecu,int* indice);
 double evaluarArbol(nodo*, double, double);
-double buscar_y_para_x(nodo* arbol, double x, double y_min, double y_max, double tolerancia, int max_iter);
-void EvaluarXeY(ecuacion*,size_t);
+void EvaluarListaDeValores(ecuacion *ecu, size_t cecu);
 void BuscarRaices(ecuacion*, size_t);
+
+int buscar_raiz_multi(nodo* arbol, double fijo, double min, double max, double tolerancia, int max_iter, double* soluciones, int max_sol, int buscar_y);
+
 void TablaAlrededorDeValor(ecuacion *ecu, size_t cecu);
 
 #endif // CALCULADORA_H_INCLUDED
